@@ -1,0 +1,30 @@
+#!/usr/local/bin node
+
+var fs = require('fs'),
+    http = require('http'),
+    https = require('https'),
+    cors = require('cors'),
+    queryObjectShared = require('./queryObject.js'),
+    common = require('./common.js'),
+    express = require('express');
+
+var port = 3001;
+
+const pool = queryObjectShared.createPool();
+
+var ssl = {
+    key: fs.readFileSync('/var/www/prayer-api/certs/prayoverus.key', 'utf8'),
+    cert: fs.readFileSync('/var/www/prayer-api/certs/795e40f423175e16.crt', 'utf8'),
+    ca: [ fs.readFileSync('/var/www/prayer-api/certs/gd_bundle-g2-g1_01.crt', 'utf8'), fs.readFileSync('/var/www/prayer-api/certs/gd_bundle-g2-g1_02.crt', 'utf8'), fs.readFileSync('/var/www/prayer-api/certs/gd_bundle-g2-g1_03.crt', 'utf8') ]
+};
+
+var app = express();
+var fileUpload = require('express-fileupload');
+app.use(cors());
+app.use(fileUpload());
+app.use(express.json()) // parse request body as JSON
+
+var server = https.createServer(ssl, app).listen(port, function(){
+  console.log("Express server listening on port " + port);
+});
+
